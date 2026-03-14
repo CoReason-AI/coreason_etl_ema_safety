@@ -77,11 +77,13 @@ def process_ema_excel(url: str) -> Iterator[dict[str, Any]]:
     """
     tmp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".xlsx")  # noqa: SIM115
     try:
-        with requests.get(url, stream=True, timeout=30) as r:
-            r.raise_for_status()
-            for chunk in r.iter_content(chunk_size=8192):
-                tmp_file.write(chunk)
-        tmp_file.close()  # Release OS lock
+        try:
+            with requests.get(url, stream=True, timeout=30) as r:
+                r.raise_for_status()
+                for chunk in r.iter_content(chunk_size=8192):
+                    tmp_file.write(chunk)
+        finally:
+            tmp_file.close()  # Release OS lock
 
         # Read from disk using highly optimized Rust calamine engine (via fastexcel)
         df = pl.read_excel(tmp_file.name, engine="calamine")

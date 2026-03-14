@@ -9,20 +9,17 @@
 # Source Code: https://github.com/CoReason-AI/coreason_etl_ema_safety
 
 import importlib
-import shutil
 from pathlib import Path
 
 
 def test_logger_initialization_no_dir() -> None:
     """Test logger initialization when logs directory doesn't exist."""
-    # Remove logs dir if it exists
-    log_path = Path("logs")
-    if log_path.exists():
-        shutil.rmtree(log_path)
+    # To prevent race conditions during parallel tests and PermissionError on Windows,
+    # we patch the Path("logs").exists to return False and ensure it creates it.
+    from unittest.mock import patch
 
-    # Re-import logger module to trigger the if not log_path.exists():
     import coreason_etl_ema_safety.utils.logger
 
-    importlib.reload(coreason_etl_ema_safety.utils.logger)
-
-    assert log_path.exists()
+    with patch.object(Path, "exists", return_value=False), patch.object(Path, "mkdir") as mock_mkdir:
+        importlib.reload(coreason_etl_ema_safety.utils.logger)
+        mock_mkdir.assert_called_once_with(parents=True, exist_ok=True)
