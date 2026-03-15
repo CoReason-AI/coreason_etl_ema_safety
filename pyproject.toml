@@ -17,6 +17,8 @@ dependencies = [
     "loguru>=0.7.2",
     "polars>=1.39.0",
     "requests>=2.32.5",
+    "dbt-core>=1.9.0",
+    "dbt-postgres>=1.9.0",
 ]
 license = { file = "LICENSE" }
 classifiers = [
@@ -96,4 +98,4 @@ asyncio_mode = "auto"
 omit = ["tests/*"]
 
 [tool.deptry.per_rule_ignores]
-DEP002 = ["dlt", "fastexcel", "polars", "requests", "loguru"]
+DEP002 = ["dlt", "fastexcel", "polars", "requests", "loguru", "dbt-core", "dbt-postgres"]
