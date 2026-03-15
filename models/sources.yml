@@ -1,0 +1,31 @@
+version: 2
+
+sources:
+  - name: ema_safety
+    schema: bronze
+    tables:
+      - name: ema_medicines_raw
+        description: "Raw JSONB data for EMA medicines report."
+        columns:
+          - name: coreason_id
+            description: "Surrogate key for the product."
+          - name: source_file_url
+            description: "The URL of the source file."
+          - name: ingestion_ts
+            description: "The timestamp when the record was ingested."
+          - name: raw_data
+            description: "The raw JSONB record from the source Excel file."
+      - name: ema_referrals_raw
+        description: "Raw JSONB data for EMA referrals report."
+        columns:
+          - name: coreason_id
+          - name: source_file_url
+          - name: ingestion_ts
+          - name: raw_data
+      - name: ema_periodic_safety_update_report_raw
+        description: "Raw JSONB data for EMA PSUSA report."
+        columns:
+          - name: coreason_id
+          - name: source_file_url
+          - name: ingestion_ts
+          - name: raw_data

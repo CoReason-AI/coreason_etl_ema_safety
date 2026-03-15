@@ -8,40 +8,55 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason_etl_ema_safety
 
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 from coreason_etl_ema_safety.pipeline import ema_safety_source
 
 
-def test_ema_safety_source() -> None:
-    """Test that the source initializes resources correctly."""
+@patch("coreason_etl_ema_safety.pipeline.discover_ema_excel_urls")
+def test_ema_safety_source_schema(mock_discover_ema_excel_urls: MagicMock) -> None:
+    """Test that the DLT source defines the correct schema for the Bronze tables."""
+    # Provide a mock URL to generate one resource
+    mock_url = "https://www.ema.europa.eu/en/documents/report/medicines-output-medicines-report_en.xlsx"
+    mock_discover_ema_excel_urls.return_value = [mock_url]
+
+    # Initialize the source
+    source = ema_safety_source()
+
+    # Get the resource generator
+    resources = list(source.resources.values())
+    assert len(resources) == 1
+
+    resource = resources[0]
+    assert resource.name == "ema_medicines_raw"
+    assert resource.write_disposition == "replace"
+
+    # Verify max table nesting is set to 0
+    assert source.max_table_nesting == 0
+
+    # Verify column definitions force proper schema
+    columns = resource.columns
+    assert isinstance(columns, dict), "Columns should be parsed into a dict by dlt"
+    assert columns["coreason_id"]["data_type"] == "text"
+    assert columns["source_file_url"]["data_type"] == "text"
+    assert columns["ingestion_ts"]["data_type"] == "timestamp"
+    assert columns["raw_data"]["data_type"] == "json"
+
+
+@patch("coreason_etl_ema_safety.pipeline.discover_ema_excel_urls")
+def test_ema_safety_source_deduplication(mock_discover_ema_excel_urls: MagicMock) -> None:
+    """Test that the DLT source deduplicates resources correctly."""
+    # Provide multiple URLs that resolve to the same dataset table name
     mock_urls = [
         "https://www.ema.europa.eu/en/documents/report/medicines-output-medicines-report_en.xlsx",
-        "https://www.ema.europa.eu/en/documents/report/medicines-output-referrals-report_en.xlsx",
-        "https://www.ema.europa.eu/en/documents/report/medicines-output-paediatric_investigation_plans-report_en.xlsx",
-        "https://www.ema.europa.eu/en/documents/report/medicines-output-orphan_designations-report_en.xlsx",
-        "https://www.ema.europa.eu/en/documents/report/medicines-output-periodic_safety_update_report_en.xlsx",
-        "https://www.ema.europa.eu/en/documents/report/some-other-file_en.xlsx",
+        "https://www.ema.europa.eu/en/documents/report/medicines-output-medicines-report_de.xlsx",
     ]
+    mock_discover_ema_excel_urls.return_value = mock_urls
 
-    with patch("coreason_etl_ema_safety.pipeline.discover_ema_excel_urls", return_value=mock_urls):
-        source = ema_safety_source()
+    # Initialize the source
+    source = ema_safety_source()
 
-        # The source acts like a mapping of resources
-        # Evaluate how many resources. Since the last two map to 'ema_unknown_raw', one is skipped.
-        assert len(source.resources) == 5
-
-        # Check a specific resource's configuration
-        medicines_resource = source.resources["ema_medicines_raw"]
-        assert medicines_resource.name == "ema_medicines_raw"
-        assert medicines_resource.table_name == "ema_medicines_raw"
-        assert medicines_resource.write_disposition == "replace"
-
-        # Check unknown dataset
-        unknown_resource = source.resources["ema_unknown_raw"]
-        assert unknown_resource.name == "ema_unknown_raw"
-        assert unknown_resource.table_name == "ema_unknown_raw"
-        assert unknown_resource.write_disposition == "replace"
-
-        # Check that max_table_nesting is 0 at the source level
-        assert source.max_table_nesting == 0
+    # Despite two URLs, we should only have one resource for this table
+    resources = list(source.resources.values())
+    assert len(resources) == 1
+    assert resources[0].name == "ema_medicines_raw"

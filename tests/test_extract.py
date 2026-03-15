@@ -38,6 +38,7 @@ def test_process_ema_excel_success() -> None:
         mock_read_excel.assert_called_once()
         args, kwargs = mock_read_excel.call_args
         assert kwargs["engine"] == "calamine"
+        assert kwargs.get("read_options", {}).get("skip_rows") == 8
         assert os.path.exists(args[0]) is False  # File should be cleaned up by finally
 
         # Check results
@@ -47,6 +48,7 @@ def test_process_ema_excel_success() -> None:
         for row in results:
             assert "coreason_id" in row
             assert "source_file_url" in row
+            assert "ingestion_ts" in row
             assert "raw_data" in row
             assert row["source_file_url"] == test_url
 
@@ -68,14 +70,24 @@ def test_discover_ema_excel_urls_success() -> None:
     """Test successful discovery of correct EMA Excel URLs."""
     from coreason_etl_ema_safety.extract import EMA_BASE_URL, EMA_DISCOVERY_URL
 
-    mock_html = """
-    <a href="/en/documents/report/medicines-output-medicines-report_en.xlsx">Link</a>
-    <a href="/en/documents/report/medicines-output-orphan_designations-report_en.xlsx">Link</a>
-    <a href="/en/documents/report/medicines-output-unrelated-report_en.xlsx">Ignored</a>
-    <a href="/en/documents/report/medicines-output-medicines-report_en.xlsx">Duplicate Link</a>
-    """
+    mock_json = [
+        {
+            "command": "insert",
+            "data": """
+                <a href="/en/documents/report/medicines-output-medicines-report_en.xlsx">Link</a>
+                <a href="/en/documents/report/medicines-output-orphan_designations-report_en.xlsx">Link</a>
+            """,
+        },
+        {
+            "command": "insert",
+            "data": """
+                <a href="/en/documents/report/medicines-output-unrelated-report_en.xlsx">Ignored</a>
+                <a href="/en/documents/report/medicines-output-medicines-report_en.xlsx">Duplicate Link</a>
+            """,
+        },
+    ]
 
-    responses.add(responses.GET, EMA_DISCOVERY_URL, body=mock_html, status=200)
+    responses.add(responses.GET, EMA_DISCOVERY_URL, json=mock_json, status=200)
 
     urls = discover_ema_excel_urls()
 

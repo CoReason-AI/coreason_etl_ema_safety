@@ -51,4 +51,10 @@ def ema_safety_source() -> Iterator[DltResource]:
             name=table_name,
             table_name=table_name,
             write_disposition="replace",
+            columns=[
+                {"name": "coreason_id", "data_type": "text"},
+                {"name": "source_file_url", "data_type": "text"},
+                {"name": "ingestion_ts", "data_type": "timestamp"},
+                {"name": "raw_data", "data_type": "json"},
+            ],
         )
