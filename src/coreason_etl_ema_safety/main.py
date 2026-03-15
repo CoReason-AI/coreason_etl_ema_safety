@@ -8,9 +8,29 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason_etl_ema_safety
 
+import dlt
+
+from coreason_etl_ema_safety.pipeline import ema_safety_source
 from coreason_etl_ema_safety.utils.logger import logger
 
 
-def hello_world() -> str:
-    logger.info("Hello World!")
-    return "Hello World!"
+def run_pipeline() -> None:
+    """
+    AGENT INSTRUCTION: Entry point for the EMA safety ETL pipeline.
+    Configures and runs the dlt pipeline for the Bronze layer.
+    """
+    logger.info("Initializing EMA safety dlt pipeline...")
+
+    pipeline = dlt.pipeline(
+        pipeline_name="ema_safety",
+        destination="postgres",
+        dataset_name="bronze",
+    )
+
+    load_info = pipeline.run(ema_safety_source())
+
+    logger.info(f"Pipeline executed successfully. Load info: {load_info}")
+
+
+if __name__ == "__main__":  # pragma: no cover
+    run_pipeline()

@@ -1,0 +1,24 @@
+version: 2
+
+models:
+  - name: ema_medicines_base
+    description: "Silver layer table containing parsed and cleaned data for EMA medicines."
+    columns:
+      - name: coreason_id
+        description: "Surrogate key for the product."
+      - name: source_file_url
+        description: "The URL of the source file."
+      - name: ingestion_ts
+        description: "The timestamp when the record was ingested."
+      - name: ema_product_number
+        description: "Natural key, Product number."
+        tests:
+          - not_null
+      - name: brand_name
+        description: "Medicine name."
+      - name: authorisation_status
+        description: "Authorisation status of the medicine."
+      - name: active_substances_array
+        description: "JSONB array of active substances."
+      - name: atc_codes_array
+        description: "JSONB array of ATC codes."

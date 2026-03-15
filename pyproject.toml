@@ -99,3 +99,6 @@ omit = ["tests/*"]
 
 [tool.deptry.per_rule_ignores]
 DEP002 = ["dlt", "fastexcel", "polars", "requests", "loguru", "dbt-core", "dbt-postgres"]
+
+[tool.uv]
+override-dependencies = ["mashumaro[msgpack]>=3.15"]
