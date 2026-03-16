@@ -40,7 +40,7 @@ def discover_ema_excel_urls() -> list[str]:
     """
     headers = {"Accept": "application/json", "X-Requested-With": "XMLHttpRequest"}
     # EMA requires specific headers to return the drupal_ajax JSON payload
-    response = requests.get(EMA_DISCOVERY_URL, headers=headers, timeout=30)
+    response = requests.post(EMA_DISCOVERY_URL, headers=headers, timeout=30)
     response.raise_for_status()
 
     # The JSON response is a list of commands, some containing HTML payloads in 'data'.
@@ -90,7 +90,7 @@ def process_ema_excel(url: str) -> Iterator[dict[str, Any]]:
         df = pl.read_excel(tmp_file.name, engine="calamine", read_options={"skip_rows": 8})
 
         # Handle Float NaN vs Null serialization trap
-        df = df.fill_nan(None).with_columns(pl.all().replace(None, None))
+        df = df.fill_nan(None).fill_null(None)
 
         # Pre-compute UUIDv5
         df = generate_coreason_ids(df)

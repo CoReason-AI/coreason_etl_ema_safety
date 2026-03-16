@@ -98,7 +98,7 @@ def test_generate_coreason_ids_empty_dataframe() -> None:
     assert len(result_df) == 0
 
 
-@given(st.lists(st.text(), min_size=1, max_size=20))  # type: ignore[misc]
+@given(st.lists(st.text(), min_size=1, max_size=20))
 def test_generate_coreason_ids_hypothesis(product_numbers: list[str]) -> Any:
     """Property-based testing for generate_coreason_ids with various string inputs."""
     # We construct a DataFrame from the text elements.
