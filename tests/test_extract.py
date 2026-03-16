@@ -19,7 +19,7 @@ import responses
 from coreason_etl_ema_safety.extract import discover_ema_excel_urls, process_ema_excel
 
 
-@responses.activate  # type: ignore[misc]
+@responses.activate
 def test_process_ema_excel_success() -> None:
     """Test successful downloading, parsing, and serialization of EMA Excel."""
     test_url = "https://www.ema.europa.eu/en/medicines/download/test.xlsx"
@@ -30,7 +30,10 @@ def test_process_ema_excel_success() -> None:
     # We mock pl.read_excel because fake_excel_content is not a real excel file
     fake_df = pl.DataFrame({"Product number": ["EMEA/1", "EMEA/2"], "Medicine name": ["Med 1", "Med 2"]})
 
-    with patch("coreason_etl_ema_safety.extract.pl.read_excel", return_value=fake_df) as mock_read_excel:
+    with (
+        patch("coreason_etl_ema_safety.extract.pl.read_excel", return_value=fake_df) as mock_read_excel,
+        patch.object(pl.DataFrame, "fill_null", return_value=fake_df),
+    ):
         # consume iterator
         results = list(process_ema_excel(test_url))
 
@@ -55,7 +58,7 @@ def test_process_ema_excel_success() -> None:
         assert results[0]["raw_data"]["Product number"] == "EMEA/1"
 
 
-@responses.activate  # type: ignore[misc]
+@responses.activate
 def test_process_ema_excel_download_error() -> None:
     """Test behavior on download error (e.g. 404)."""
     test_url = "https://www.ema.europa.eu/en/medicines/download/error.xlsx"
@@ -65,7 +68,7 @@ def test_process_ema_excel_download_error() -> None:
         list(process_ema_excel(test_url))
 
 
-@responses.activate  # type: ignore[misc]
+@responses.activate
 def test_discover_ema_excel_urls_success() -> None:
     """Test successful discovery of correct EMA Excel URLs."""
     from coreason_etl_ema_safety.extract import EMA_BASE_URL, EMA_DISCOVERY_URL
@@ -87,7 +90,7 @@ def test_discover_ema_excel_urls_success() -> None:
         },
     ]
 
-    responses.add(responses.GET, EMA_DISCOVERY_URL, json=mock_json, status=200)
+    responses.add(responses.POST, EMA_DISCOVERY_URL, json=mock_json, status=200)
 
     urls = discover_ema_excel_urls()
 
@@ -96,12 +99,12 @@ def test_discover_ema_excel_urls_success() -> None:
     assert f"{EMA_BASE_URL}/en/documents/report/medicines-output-orphan_designations-report_en.xlsx" in urls
 
 
-@responses.activate  # type: ignore[misc]
+@responses.activate
 def test_discover_ema_excel_urls_error() -> None:
     """Test discover_ema_excel_urls handles HTTP errors."""
     from coreason_etl_ema_safety.extract import EMA_DISCOVERY_URL
 
-    responses.add(responses.GET, EMA_DISCOVERY_URL, status=500)
+    responses.add(responses.POST, EMA_DISCOVERY_URL, status=500)
 
     with pytest.raises(requests.exceptions.HTTPError):
         discover_ema_excel_urls()
