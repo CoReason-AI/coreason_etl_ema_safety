@@ -30,10 +30,7 @@ def test_process_ema_excel_success() -> None:
     # We mock pl.read_excel because fake_excel_content is not a real excel file
     fake_df = pl.DataFrame({"Product number": ["EMEA/1", "EMEA/2"], "Medicine name": ["Med 1", "Med 2"]})
 
-    with (
-        patch("coreason_etl_ema_safety.extract.pl.read_excel", return_value=fake_df) as mock_read_excel,
-        patch.object(pl.DataFrame, "fill_null", return_value=fake_df),
-    ):
+    with patch("coreason_etl_ema_safety.extract.pl.read_excel", return_value=fake_df) as mock_read_excel:
         # consume iterator
         results = list(process_ema_excel(test_url))
 

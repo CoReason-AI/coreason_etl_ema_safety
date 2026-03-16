@@ -90,7 +90,7 @@ def process_ema_excel(url: str) -> Iterator[dict[str, Any]]:
         df = pl.read_excel(tmp_file.name, engine="calamine", read_options={"skip_rows": 8})
 
         # Handle Float NaN vs Null serialization trap
-        df = df.fill_nan(None).fill_null(None)
+        df = df.fill_nan(None).fill_null(pl.lit(None))
 
         # Pre-compute UUIDv5
         df = generate_coreason_ids(df)
