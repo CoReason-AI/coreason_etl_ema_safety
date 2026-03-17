@@ -40,7 +40,7 @@ def discover_ema_excel_urls() -> list[str]:
     """
     headers = {"Accept": "application/json", "X-Requested-With": "XMLHttpRequest"}
     # EMA requires specific headers to return the drupal_ajax JSON payload
-    response = requests.post(EMA_DISCOVERY_URL, headers=headers, timeout=30)
+    response = requests.get(EMA_DISCOVERY_URL, headers=headers, timeout=30)
     response.raise_for_status()
 
     # The JSON response is a list of commands, some containing HTML payloads in 'data'.

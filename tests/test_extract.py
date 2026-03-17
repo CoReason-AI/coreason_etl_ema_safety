@@ -87,7 +87,7 @@ def test_discover_ema_excel_urls_success() -> None:
         },
     ]
 
-    responses.add(responses.POST, EMA_DISCOVERY_URL, json=mock_json, status=200)
+    responses.add(responses.GET, EMA_DISCOVERY_URL, json=mock_json, status=200)
 
     urls = discover_ema_excel_urls()
 
@@ -101,7 +101,7 @@ def test_discover_ema_excel_urls_error() -> None:
     """Test discover_ema_excel_urls handles HTTP errors."""
     from coreason_etl_ema_safety.extract import EMA_DISCOVERY_URL
 
-    responses.add(responses.POST, EMA_DISCOVERY_URL, status=500)
+    responses.add(responses.GET, EMA_DISCOVERY_URL, status=500)
 
     with pytest.raises(requests.exceptions.HTTPError):
         discover_ema_excel_urls()
