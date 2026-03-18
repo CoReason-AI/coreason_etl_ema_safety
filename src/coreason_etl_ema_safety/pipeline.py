@@ -32,9 +32,14 @@ def ema_safety_source() -> Iterator[DltResource]:
 
     for url in urls:
         # Extract dataset name from URL to form the table name
-        # e.g. from /medicines-output-medicines-report_en.xlsx -> ema_medicines_report_raw
-        match = re.search(r"medicines-output-([a-zA-Z0-9_-]+)-report", url)
+        # e.g. from /medicines-output-medicines-report_en.xlsx -> ema_medicines_raw
+        match = re.search(r"medicines-output-(.*?)(?:-report|_report)?(?:_[a-zA-Z]{2})?\.xlsx", url)
         dataset_name = match.group(1).replace("-", "_").replace(" ", "_") if match else "unknown"
+
+        # The dbt models expect the exact name 'periodic_safety_update_report' but our regex strips '_report'.
+        # We handle this specific case explicitly.
+        if dataset_name == "periodic_safety_update":
+            dataset_name = "periodic_safety_update_report"
 
         table_name = f"ema_{dataset_name}_raw"
 
