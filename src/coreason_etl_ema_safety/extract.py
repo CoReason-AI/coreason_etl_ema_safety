@@ -29,7 +29,7 @@ TARGET_REPORT_NAMES = {
     "medicines-output-referrals-report",
     "medicines-output-paediatric_investigation_plans-report",
     "medicines-output-orphan_designations-report",
-    "medicines-output-periodic_safety_update_report",
+    "medicines-output-periodic_safety_update_report_single_assessments-report",
 }
 
 
