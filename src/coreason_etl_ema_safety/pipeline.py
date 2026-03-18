@@ -38,7 +38,7 @@ def ema_safety_source() -> Iterator[DltResource]:
 
         # The dbt models expect the exact name 'periodic_safety_update_report' but our regex strips '_report'.
         # We handle this specific case explicitly.
-        if dataset_name == "periodic_safety_update":
+        if dataset_name in ("periodic_safety_update", "periodic_safety_update_report_single_assessments"):
             dataset_name = "periodic_safety_update_report"
 
         table_name = f"ema_{dataset_name}_raw"
