@@ -17,7 +17,7 @@ from coreason_etl_ema_safety.pipeline import ema_safety_source
 def test_ema_safety_source_schema(mock_discover_ema_excel_urls: MagicMock) -> None:
     """Test that the DLT source defines the correct schema for the Bronze tables."""
     # Provide a mock URL to generate one resource
-    mock_url = "https://www.ema.europa.eu/en/documents/report/medicines-output-periodic_safety_update_report_en.xlsx"
+    mock_url = "https://www.ema.europa.eu/en/documents/report/medicines-output-periodic_safety_update_report_single_assessments-report_en.xlsx"
     mock_discover_ema_excel_urls.return_value = [mock_url]
 
     # Initialize the source
