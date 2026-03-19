@@ -17,6 +17,8 @@ from typing import Any
 
 import polars as pl
 import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 from coreason_etl_ema_safety.transform import generate_coreason_ids
 
@@ -33,14 +35,33 @@ TARGET_REPORT_NAMES = {
 }
 
 
+def get_retry_session() -> requests.Session:
+    """
+    AGENT INSTRUCTION: Configures a requests Session with exponential backoff.
+    Specifically targets 429 (Too Many Requests) and standard 5xx server errors.
+    Ignores strict Retry-After headers due to upstream formatting bugs.
+    """
+    session = requests.Session()
+    retries = Retry(
+        total=5,             # Maximum number of retries
+        backoff_factor=2,    # Wait 2, 4, 8, 16, 32 seconds between retries
+        status_forcelist=[429, 500, 502, 503, 504],
+        respect_retry_after_header=False,  # <--- THIS FIXES THE 10.000 ERROR
+    )
+    session.mount("https://", HTTPAdapter(max_retries=retries))
+    return session
+
+
 def discover_ema_excel_urls() -> list[str]:
     """
     AGENT INSTRUCTION: Discovers EMA Excel download URLs from the discovery endpoint.
     Filters links to match the exact datasets requested in the FRD.
     """
     headers = {"Accept": "application/json", "X-Requested-With": "XMLHttpRequest"}
-    # EMA requires specific headers to return the drupal_ajax JSON payload
-    response = requests.get(EMA_DISCOVERY_URL, headers=headers, timeout=30)
+    
+    # Use the retry session to handle potential 429 Too Many Requests
+    session = get_retry_session()
+    response = session.get(EMA_DISCOVERY_URL, headers=headers, timeout=30)
     response.raise_for_status()
 
     # The JSON response is a list of commands, some containing HTML payloads in 'data'.
@@ -73,13 +94,14 @@ def discover_ema_excel_urls() -> list[str]:
 def process_ema_excel(url: str) -> Iterator[dict[str, Any]]:
     """
     AGENT INSTRUCTION: Streams an EMA excel file and serializes rows to raw JSONB payloads safely.
-
     Adheres strictly to the "Safe Excel Streaming & Serialization Pattern".
     """
     tmp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".xlsx")  # noqa: SIM115
+    session = get_retry_session()
+    
     try:
         try:
-            with requests.get(url, stream=True, timeout=30) as r:
+            with session.get(url, stream=True, timeout=30) as r:
                 r.raise_for_status()
                 for chunk in r.iter_content(chunk_size=8192):
                     tmp_file.write(chunk)
