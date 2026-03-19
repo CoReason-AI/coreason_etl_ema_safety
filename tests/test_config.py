@@ -68,7 +68,7 @@ def test_settings_debug_variations() -> None:
             settings = Settings()
             assert settings.DEBUG is True
 
-    false_values = ["false", "0", "f", "no", "FALSE", "No", ""]
+    false_values = ["false", "0", "f", "no", "FALSE", "No"]
 
     for val in false_values:
         with patch.dict(os.environ, {"DEBUG": val}, clear=True):

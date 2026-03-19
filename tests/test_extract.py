@@ -56,6 +56,44 @@ def test_process_ema_excel_success() -> None:
 
 
 @responses.activate
+def test_process_ema_excel_complex_dataframe() -> None:
+    """Test successful processing of a dataframe with NaN floats, null values, and special characters."""
+    test_url = "https://www.ema.europa.eu/en/medicines/download/complex.xlsx"
+
+    responses.add(responses.GET, test_url, body=b"fake_excel_content", status=200)
+
+    # DataFrame with missing values (None), floating point NaN (which calamine might yield), and special characters
+    fake_df = pl.DataFrame(
+        {
+            "Product number": ["EMEA/1", None, "EMEA/3 ", ""],
+            "Medicine name": ["Med 1\n", "Med 2", "Med 3", None],
+            "Price": [1.5, float("nan"), 3.14, None],  # float containing NaN and None
+        }
+    )
+
+    with patch("coreason_etl_ema_safety.extract.pl.read_excel", return_value=fake_df) as mock_read_excel:
+        results = list(process_ema_excel(test_url))
+
+        assert mock_read_excel.called
+        assert len(results) == 4
+
+        # Validate coreason_id generation: 1st valid, 2nd missing, 3rd valid, 4th empty string
+        assert results[0]["coreason_id"] is not None
+        assert results[1]["coreason_id"] is None
+        assert results[2]["coreason_id"] is not None
+        assert results[3]["coreason_id"] is None
+
+        # Validate that NaN was serialized to None in "raw_data" to prevent JSON serialization errors
+        assert results[0]["raw_data"]["Price"] == 1.5
+        assert results[1]["raw_data"]["Price"] is None
+        assert results[2]["raw_data"]["Price"] == 3.14
+        assert results[3]["raw_data"]["Price"] is None
+
+        # Validate that null Medicine name was preserved as None
+        assert results[3]["raw_data"]["Medicine name"] is None
+
+
+@responses.activate
 def test_process_ema_excel_download_error() -> None:
     """Test behavior on download error (e.g. 404)."""
     test_url = "https://www.ema.europa.eu/en/medicines/download/error.xlsx"
