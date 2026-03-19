@@ -1,7 +1,7 @@
 version: 2
 
 models:
-  - name: gold_ema_safety_alerts
+  - name: coreason_etl_ema_safety_gold_safety_alerts
     description: "Analytics-ready Gold layer table unifying EMA medicines with Referrals and PSUSAs data for safety monitoring."
     columns:
       - name: coreason_id
@@ -27,7 +27,7 @@ models:
       - name: psusa_outcome
         description: "Outcome of any associated Periodic Safety Update Single Assessment (PSUSA)."
 
-  - name: gold_ema_clinical_index
+  - name: coreason_etl_ema_safety_gold_clinical_index
     description: "A clean text-searchable view combining the brand_name, active_substances_array, and indication data for RAG vector databases."
     columns:
       - name: coreason_id

@@ -28,7 +28,7 @@ def test_ema_safety_source_schema(mock_discover_ema_excel_urls: MagicMock) -> No
     assert len(resources) == 1
 
     resource = resources[0]
-    assert resource.name == "ema_periodic_safety_update_report_raw"
+    assert resource.name == "coreason_etl_ema_safety_bronze_periodic_safety_update_report"
     assert resource.write_disposition == "replace"
 
     # Verify max table nesting is set to 0
@@ -59,4 +59,4 @@ def test_ema_safety_source_deduplication(mock_discover_ema_excel_urls: MagicMock
     # Despite two URLs, we should only have one resource for this table
     resources = list(source.resources.values())
     assert len(resources) == 1
-    assert resources[0].name == "ema_medicines_raw"
+    assert resources[0].name == "coreason_etl_ema_safety_bronze_medicines"
