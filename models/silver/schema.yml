@@ -1,7 +1,7 @@
 version: 2
 
 models:
-  - name: ema_medicines_base
+  - name: coreason_etl_ema_safety_silver_medicines_base
     description: "Silver layer table containing parsed and cleaned data for EMA medicines."
     columns:
       - name: coreason_id

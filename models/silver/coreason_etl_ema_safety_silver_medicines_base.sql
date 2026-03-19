@@ -19,7 +19,7 @@ WITH source_data AS (
         source_file_url,
         ingestion_ts,
         raw_data
-    FROM {{ source('ema_safety', 'ema_medicines_raw') }}
+    FROM {{ source('ema_safety', 'coreason_etl_ema_safety_bronze_medicines') }}
 )
 
 SELECT

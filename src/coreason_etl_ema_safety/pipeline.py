@@ -41,7 +41,7 @@ def ema_safety_source() -> Iterator[DltResource]:
         if dataset_name in ("periodic_safety_update", "periodic_safety_update_report_single_assessments"):
             dataset_name = "periodic_safety_update_report"
 
-        table_name = f"ema_{dataset_name}_raw"
+        table_name = f"coreason_etl_ema_safety_bronze_{dataset_name}"
 
         # Prevent duplicate resource names, which dlt does not allow
         if table_name in seen_tables:

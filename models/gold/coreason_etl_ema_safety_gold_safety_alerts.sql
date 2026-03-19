@@ -21,7 +21,7 @@ WITH medicines AS (
         authorisation_status,
         active_substances_array,
         atc_codes_array
-    FROM {{ ref('ema_medicines_base') }}
+    FROM {{ ref('coreason_etl_ema_safety_silver_medicines_base') }}
 ),
 
 referrals AS (
@@ -31,7 +31,7 @@ referrals AS (
         NULLIF(TRIM(raw_data->>'International non-proprietary name (INN) / common name'), '') AS referral_inn,
         NULLIF(TRIM(raw_data->>'Current status'), '') AS current_status,
         NULLIF(TRIM(raw_data->>'Referral type'), '') AS referral_type
-    FROM {{ source('ema_safety', 'ema_referrals_raw') }}
+    FROM {{ source('ema_safety', 'coreason_etl_ema_safety_bronze_referrals') }}
 ),
 
 psusa AS (
@@ -40,7 +40,7 @@ psusa AS (
         NULLIF(TRIM(raw_data->>'Medicine name'), '') AS psusa_medicine_name,
         NULLIF(TRIM(raw_data->>'Active substance'), '') AS psusa_active_substance,
         NULLIF(TRIM(raw_data->>'Outcome'), '') AS psusa_outcome
-    FROM {{ source('ema_safety', 'ema_periodic_safety_update_report_raw') }}
+    FROM {{ source('ema_safety', 'coreason_etl_ema_safety_bronze_periodic_safety_update_report') }}
 )
 
 SELECT

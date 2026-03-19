@@ -20,8 +20,8 @@ WITH base_medicines AS (
         m.brand_name,
         m.active_substances_array,
         NULLIF(TRIM(r.raw_data->>'Therapeutic indication'), '') AS therapeutic_indication
-    FROM {{ ref('ema_medicines_base') }} m
-    LEFT JOIN {{ source('ema_safety', 'ema_medicines_raw') }} r
+    FROM {{ ref('coreason_etl_ema_safety_silver_medicines_base') }} m
+    LEFT JOIN {{ source('ema_safety', 'coreason_etl_ema_safety_bronze_medicines') }} r
         ON m.coreason_id = r.coreason_id
 )
 

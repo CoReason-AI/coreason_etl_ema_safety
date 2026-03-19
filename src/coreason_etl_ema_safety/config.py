@@ -8,30 +8,36 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason_etl_ema_safety
 
-import os
+from pydantic import Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-class Settings:
+class Settings(BaseSettings):
     """
     AGENT INSTRUCTION: Handles application configuration using environment variables.
-    Follows 12-Factor App principles.
+    Follows 12-Factor App principles and validates inputs using Pydantic.
     """
 
-    def __init__(self) -> None:
-        # Core
-        self.APP_ENV: str = os.getenv("APP_ENV", "development")
-        self.DEBUG: bool = os.getenv("DEBUG", "false").lower() in ("true", "1", "t", "yes")
-        self.SECRET_KEY: str | None = os.getenv("SECRET_KEY")
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        extra="ignore",
+    )
 
-        # Logging
-        self.LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
+    # Core
+    APP_ENV: str = Field(default="development", description="App environment (development, testing, production).")
+    DEBUG: bool = Field(default=False, description="Enable debug mode.")
+    SECRET_KEY: str | None = Field(default=None, description="Secret key for cryptographic signing.")
 
-        # Postgres Credentials
-        self.PGHOST: str = os.getenv("PGHOST", "localhost")
-        self.PGPORT: str = os.getenv("PGPORT", "5432")
-        self.PGUSER: str = os.getenv("PGUSER", "postgres")
-        self.PGPASSWORD: str = os.getenv("PGPASSWORD", "postgres")
-        self.PGDATABASE: str = os.getenv("PGDATABASE", "coreason_ema")
+    # Logging
+    LOG_LEVEL: str = Field(default="INFO", description="Log level for the application.")
+
+    # Postgres Credentials
+    PGHOST: str = Field(default="localhost", description="Postgres host address.")
+    PGPORT: str = Field(default="5432", description="Postgres port.")
+    PGUSER: str = Field(default="postgres", description="Postgres user name.")
+    PGPASSWORD: str = Field(default="postgres", description="Postgres password.")
+    PGDATABASE: str = Field(default="coreason_ema", description="Postgres database name.")
 
 
 settings = Settings()
