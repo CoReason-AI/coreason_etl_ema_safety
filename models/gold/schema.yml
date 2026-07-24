@@ -1,0 +1,48 @@
+version: 2
+
+models:
+  - name: coreason_etl_ema_safety_gold_safety_alerts
+    description: "Analytics-ready Gold layer table unifying EMA medicines with Referrals and PSUSAs data for safety monitoring."
+    columns:
+      - name: coreason_id
+        description: "Surrogate key for the product."
+      - name: ema_product_number
+        description: "Natural key, Product number."
+        tests:
+          - not_null
+      - name: brand_name
+        description: "Brand name of the medicine."
+      - name: authorisation_status
+        description: "Authorisation status of the medicine."
+      - name: active_substances_array
+        description: "JSONB array of active substances."
+      - name: atc_codes_array
+        description: "JSONB array of ATC codes."
+      - name: referral_name
+        description: "Name of any associated safety referral."
+      - name: referral_status
+        description: "Current status of the associated safety referral."
+      - name: referral_type
+        description: "Type of the associated safety referral."
+      - name: psusa_outcome
+        description: "Outcome of any associated Periodic Safety Update Single Assessment (PSUSA)."
+
+  - name: coreason_etl_ema_safety_gold_clinical_index
+    description: "A clean text-searchable view combining the brand_name, active_substances_array, and indication data for RAG vector databases."
+    columns:
+      - name: coreason_id
+        description: "Surrogate key for the product."
+      - name: ema_product_number
+        description: "Natural key, Product number."
+        tests:
+          - not_null
+      - name: brand_name
+        description: "Brand name of the medicine."
+      - name: active_substances_array
+        description: "JSONB array of active substances."
+      - name: therapeutic_indication
+        description: "Extracted therapeutic indication from the raw source."
+      - name: clinical_index_text
+        description: "Concatenated text blob of Brand Name, Active Substances, and Indication formatted for full-text search."
+        tests:
+          - not_null

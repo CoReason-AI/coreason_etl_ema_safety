@@ -8,14 +8,11 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason_etl_ema_safety
 
-"""
-ETL process for integrating European Medicines Agency (EMA) safety data
-"""
+from coreason_etl_ema_safety.utils.logger import logger
 
-__version__ = "0.1.0"
-__author__ = "Akshaya M"
-__email__ = "akshaya.movvar@coreason.ai"
 
-from coreason_etl_ema_safety.main import run_pipeline
-
-__all__ = ["run_pipeline"]
+def test_logger_initialization() -> None:
+    """Test logger initialization and file creation."""
+    assert logger is not None
+    # Just sending a log message to exercise the logger.
+    logger.info("Test log message.")

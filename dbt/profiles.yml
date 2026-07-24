@@ -8,14 +8,16 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason_etl_ema_safety
 
-"""
-ETL process for integrating European Medicines Agency (EMA) safety data
-"""
-
-__version__ = "0.1.0"
-__author__ = "Akshaya M"
-__email__ = "akshaya.movvar@coreason.ai"
-
-from coreason_etl_ema_safety.main import run_pipeline
-
-__all__ = ["run_pipeline"]
+coreason_etl_ema_safety:
+  target: dev
+  outputs:
+    dev:
+      type: postgres
+      host: "{{ env_var('PGHOST', 'localhost') }}"
+      user: "{{ env_var('PGUSER', 'postgres') }}"
+      password: "{{ env_var('PGPASSWORD', 'postgres') }}"
+      port: "{{ env_var('PGPORT', 5432) | as_number }}"
+      dbname: "{{ env_var('PGDATABASE', 'postgres') }}"
+      schema: public
+      threads: 4
+      keepalives_idle: 0
